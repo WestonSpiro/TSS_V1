@@ -1,0 +1,80 @@
+#!/usr/bin/env python3
+# The Sheet Sweeper CSV/TSV Edition
+# OSSSC 2023 (Wyeth Levi & Weston Spiro)
+# For Windows Operating Systems Only
+import tkinter as tk
+from tkinter import filedialog, messagebox
+import csv
+import pandas as pd
+
+def clean_csv_file(input_file):
+    output_file = "Swept_" + input_file.split("/")[-1]
+    with open(input_file, 'r', newline='') as f_in, open(output_file, 'w', newline='') as f_out:
+        reader = csv.reader(f_in)
+        writer = csv.writer(f_out)
+        for row in reader:
+            new_row = []
+            for cell in row:
+                new_cell = ""
+                for char in cell:
+                    if char not in ['!', '@', '#', '^', '&', '*', '(', ')', '[', ']', '{', '}', '~', '`', "'", ':', ';', '<', '>', '/', '\\', '_', '|', '"', '?']:
+                        new_cell += char
+                new_row.append(new_cell)
+            writer.writerow(new_row)
+    return output_file
+    
+def clean_xlsx_file(input_file):
+    output_file = "Swept_" + input_file.split("/")[-1] 
+    df = pd.read_excel(input_file)
+    df = df.applymap(lambda x: ''.join([i for i in str(x) if i.isalnum() or i in [' ', '-']]))
+    df.to_excel(output_file, index=False)
+    return output_file
+	
+def browse_csv_file():
+    file_path = filedialog.askopenfilename()
+    if file_path[:-4] == ".csv" or ".tsv":
+        cleaned_file = clean_csv_file(file_path)
+        file_name = file_path.split("/")[-1]
+        messagebox.showinfo(title="Success", message=f"{file_name} \ncleaned successfully \nand saved as \n{cleaned_file}")
+    else:
+        messagebox.showinfo(title="Error", message=f"Unsupported File Type")
+    
+def browse_xlsx_file():
+    file_path = filedialog.askopenfilename()
+    if file_path[:-5] == "xlsx":
+        cleaned_file = clean_xlsx_file(file_path)
+        file_name = file_path.split("/")[-1]
+        messagebox.showinfo(title="Success", message=f"{file_name} \ncleaned successfully \nand saved as \n{cleaned_file}")
+    else:
+        messagebox.showinfo(title="Error", message=f"Unsupported File Type")
+
+root = tk.Tk()
+root.title("The_Sheet_Sweeper")
+root.geometry("300x300")
+
+label_text = "\nThe Sheet Sweeper\n"
+label = tk.Label(root, text=label_text)
+label.pack()
+
+browse_button = tk.Button(root, text="Select CSV or TSV file", command=browse_csv_file)
+browse_button.pack()
+
+label_text_01 = ""
+label = tk.Label(root, text=label_text_01)
+label.pack()
+
+browse_button_01 = tk.Button(root, text="Select XLSX file", command=browse_xlsx_file)
+browse_button_01.pack()
+
+label_text_02 = ""
+label = tk.Label(root, text=label_text_02)
+label.pack()
+
+quit_button = tk.Button(root, text = "Quit", command=root.destroy)
+quit_button.pack()
+
+label_text_03 = "\nOSSSSC 2023\n \nWyeth Levi & Weston Spiro\n"
+label = tk.Label(root, text=label_text_03)
+label.pack()
+
+root.mainloop()
